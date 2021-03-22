@@ -5,6 +5,7 @@ getwd()
 path <-"C:/Envimaster/MSc_Thesis" # set drive letter for stick
 setwd(path)
 
+### 1. Compute Predictor Stacks ##############################################################################
 
 # load libs
 require(raster)
@@ -73,7 +74,7 @@ writeRaster(full_stk,"full_stk.grd", format="raster")
             # save selected_stk
             writeRaster(selected_stk,"selected_stk.grd", format="raster")
 
-### II Dimensional Reduction (corT and hmgy)
+### 2. Dimensional Reduction (corT and hmgy) ####################################################################
 
 ###'full_stk' cor -> hmgy
 # cor test
@@ -106,9 +107,9 @@ writeRaster(hmgy_full,"hmgy_full.grd", format="raster")
                             corT2_full <- detct_RstCor(hmgy2_full,0.7)
                             writeRaster(corT2_full,"corT2_full.grd", format="raster")
 
-### compute PCA
+### 3. compute PCA Stacks ########################################################################################
 
-### simple RGB PCA ####
+### simple RGB PCA
 pca_rgb = RStoolbox::rasterPCA(lau_rgb,maskCheck = T, spca = T, nComp = 3)
 # pca to stk
 stk_pca_rgb <-pca_rgb$map # stk = pca (rgb only)
@@ -119,65 +120,54 @@ stk_pca_rgb2<- raster::stack(stk_pca_rgb,lau_rgb) # stk = pca (rgb only) + singl
 writeRaster(stk_pca_rgb2,"DATA/PCA_stk/pca_rgb2.grd", format="raster")
 
 
-### PCA with INDEX
+         ### PCA with INDEX ###
 
-### Index + RGB PCA ####
-# all indices + single band RGB for PCA
-# build new Stack
-ind <-vegInd_RGB(lau_rgb,3,2,1,indlist = c("VVI","VARI","NDTI","CI","BI","SI","TGI","GLI","NGRDI"))
-# HI and RI lead to INF values which raster PCA cannot handle. incidence to drop both from LEGION because often problems occure.
-ind_stk <- raster::stack(lau_rgb,ind)
-# pca
-pca_ind = RStoolbox::rasterPCA(ind_stk,maskCheck = T, spca = T, nComp = 3)
-# pca to Stack
-stk_pca_ind <- pca_ind$map # stk = pca (indices and rgb)
-writeRaster(stk_pca_ind,"DATA/PCA_stk/pca_indrgb.grd", format="raster")
+         ### Index + RGB PCA
+         # all indices + single band RGB for PCA
+         # build new Stack
+         ind <-vegInd_RGB(lau_rgb,3,2,1,indlist = c("VVI","VARI","NDTI","CI","BI","SI","TGI","GLI","NGRDI"))
+         # HI and RI lead to INF values which raster PCA cannot handle. incidence to drop both from LEGION because often problems occure.
+         ind_stk <- raster::stack(lau_rgb,ind)
+         # pca
+         pca_ind = RStoolbox::rasterPCA(ind_stk,maskCheck = T, spca = T, nComp = 3)
+         # pca to Stack
+         stk_pca_ind <- pca_ind$map # stk = pca (indices and rgb)
+         writeRaster(stk_pca_ind,"DATA/PCA_stk/pca_indrgb.grd", format="raster")
 
-### Index only PCA ####
-pca_ind_only = RStoolbox::rasterPCA(ind,maskCheck = T, spca = T, nComp = 3)
-# pca to stk
-stk_pca_ind_only <- pca_ind_only$map # stk = pca (indices only)
-writeRaster(stk_pca_ind_only,"DATA/PCA_stk/pca_ind.grd", format="raster")
+         ### Index only PCA ####
+         pca_ind_only = RStoolbox::rasterPCA(ind,maskCheck = T, spca = T, nComp = 3)
+         # pca to stk
+         stk_pca_ind_only <- pca_ind_only$map # stk = pca (indices only)
+         writeRaster(stk_pca_ind_only,"DATA/PCA_stk/pca_ind.grd", format="raster")
 
-### Index only PCA + RGB in Stack ####
-stk_pca_ind_rgb <- raster::stack(stk_pca_ind_only,lau_rgb) # stk = pca (indices only) +RGB
-writeRaster(stk_pca_ind_rgb,"DATA/PCA_stk/pca_ind_RGB.grd", format="raster")
-
-
-
-### Filter the PCA #################################################################################
-
-### Filter
+         ### Index only PCA + RGB in Stack ####
+         stk_pca_ind_rgb <- raster::stack(stk_pca_ind_only,lau_rgb) # stk = pca (indices only) +RGB
+         writeRaster(stk_pca_ind_rgb,"DATA/PCA_stk/pca_ind_RGB.grd", format="raster")
 
 
+                  # filter on RGB
+                  rgb_filt <- filter_Stk(lau_rgb,sizes = c(3,5,7,9))
+                  # combine rgb filter with org rgb bands
+                  stk_rgb <- raster::stack(rgb_filt,lau_rgb)
+                  # pca
+                  pca_rgb_filt = RStoolbox::rasterPCA(stk_rgb,maskCheck = T, spca = T, nComp = 3)
+                  # pca to stack
+                  stk_pca_rgb_filt <- pca_rgb_filt$map
+                  writeRaster(stk_pca_rgb_filt,"DATA/PCA_stk/pca_rgb_filt.grd", format="raster")
 
-### PCA with FILTER #################################################################################################
+                  #### Filter Index and RGB PCA ####
+                  ## indices, filter indices + rgb +org indices###
+                  #
+                  ## filter indices
+                  #ind_filt <- filter_Stk(ind_stk,sizes = c(3,5,7,9))
+                  ## combine filter and index filter and indices+rgb org
+                  #ind_filt_stk <- raster::stack(ind_filt,ind_stk,stk_rgb)
+                  ## pca
+                  #pca_ind_filt = RStoolbox::rasterPCA(ind_filt_stk,maskCheck = T, spca = T, nComp = 3)
+                  ## pca to stk
+                  #stk_pca_ind_only <- pca_ind_filt$map #stk = pca (filter both ind and rgb, indices org, rgb)
+                  #writeRaster(pca_ind_filt,"PCA_stk/pca_rgbind_filt.grd", format="raster")
 
-### Filter RGB PCA ####
-# filter on RGB
-rgb_filt <- filter_Stk(lau_rgb,sizes = c(3,5,7,9))
-# combine rgb filter with org rgb bands
-stk_rgb <- raster::stack(rgb_filt,lau_rgb)
-# pca
-pca_rgb_filt = RStoolbox::rasterPCA(stk_rgb,maskCheck = T, spca = T, nComp = 3)
-# pca to stack
-stk_pca_rgb_filt <- pca_rgb_filt$map
-writeRaster(stk_pca_rgb_filt,"DATA/PCA_stk/pca_rgb_filt.grd", format="raster")
-
-#### Filter Index and RGB PCA ####
-## indices, filter indices + rgb +org indices###
-#
-## filter indices
-#ind_filt <- filter_Stk(ind_stk,sizes = c(3,5,7,9))
-## combine filter and index filter and indices+rgb org
-#ind_filt_stk <- raster::stack(ind_filt,ind_stk,stk_rgb)
-## pca
-#pca_ind_filt = RStoolbox::rasterPCA(ind_filt_stk,maskCheck = T, spca = T, nComp = 3)
-## pca to stk
-#stk_pca_ind_only <- pca_ind_filt$map #stk = pca (filter both ind and rgb, indices org, rgb)
-#writeRaster(pca_ind_filt,"PCA_stk/pca_rgbind_filt.grd", format="raster")
-
-###################################################################################################
 
 ### PCAs for the LEGION_Stks
 hmgy_selected <- raster::stack(file.path("C:/Envimaster/MSc_Thesis/Data/LEGION_stk/hmgy_selected.grd"))
@@ -192,32 +182,25 @@ stk_pca_hmgy_full <- pca_hmgy_full$map
 # write
 writeRaster(stk_pca_hmgy_full,"DATA/PCA_stk/pca_hmgy_full.grd", format="raster")
 
+         pca_hmgy_selected <- RStoolbox::rasterPCA(hmgy_selected,maskCheck = T, spca = T, nComp = 3)
+         # PCA to Stk
+         stk_pca_hmgy_selected <- pca_hmgy_selected$map
+         # write
+         writeRaster(stk_pca_hmgy_selected,"DATA/PCA_stk/pca_hmgy_selected.grd", format="raster")
 
+                  pca_hmgy_small <- RStoolbox::rasterPCA(hmgy_small,maskCheck = T, spca = T, nComp = 3)
+                  # PCA to Stk
+                  stk_pca_hmgy_small <- pca_hmgy_small$map
+                  # write
+                  writeRaster(stk_pca_hmgy_small,"DATA/PCA_stk/pca_hmgy_small.grd", format="raster")
 
-pca_hmgy_selected <- RStoolbox::rasterPCA(hmgy_selected,maskCheck = T, spca = T, nComp = 3)
-# PCA to Stk
-stk_pca_hmgy_selected <- pca_hmgy_selected$map
-# write
-writeRaster(stk_pca_hmgy_selected,"DATA/PCA_stk/pca_hmgy_selected.grd", format="raster")
+                           pca_corT2_full <- RStoolbox::rasterPCA(corT2_full,maskCheck = T, spca = T, nComp = 3)
+                           # PCA to Stk
+                           stk_pca_corT2_full <- pca_corT2_full$map
+                           # write
+                           writeRaster(stk_pca_corT2_full,"DATA/PCA_stk/pca_corT2_full.grd", format="raster")
 
-
-
-pca_hmgy_small <- RStoolbox::rasterPCA(hmgy_small,maskCheck = T, spca = T, nComp = 3)
-# PCA to Stk
-stk_pca_hmgy_small <- pca_hmgy_small$map
-# write
-writeRaster(stk_pca_hmgy_small,"DATA/PCA_stk/pca_hmgy_small.grd", format="raster")
-
-
-pca_corT2_full <- RStoolbox::rasterPCA(corT2_full,maskCheck = T, spca = T, nComp = 3)
-# PCA to Stk
-stk_pca_corT2_full <- pca_corT2_full$map
-# write
-writeRaster(stk_pca_corT2_full,"DATA/PCA_stk/pca_corT2_full.grd", format="raster")
-
-### 1. compute STK equal to PCA
-
-### RGB and RGB indices
+### 4. FFS Stacks
 
 # compute RGB indices using LEGION
 ind <-vegInd_RGB(lau_rgb,3,2,1,indlist = c("VVI","VARI","NDTI","CI","BI","SI","TGI","GLI","NGRDI"))
@@ -229,30 +212,27 @@ ind_stk <- raster::stack(lau_rgb,ind)
 writeRaster(ind_stk,"DATA/FFS_stk/indRGB.grd", format="raster") # equal to pca_indrgb
 writeRaster(ind,"DATA/FFS_stk/ind_only.grd", format="raster") # equal to pca_ind
 
-# filter
-rgb_filt <- filter_Stk(lau_rgb,sizes = c(3,5,7,9))
-nlayers(rgb_filt) # 108 seems to be too much for my laptop for FFS
-rgb_filtcor <- detct_RstCor(Stk = rgb_filt,THvalue = 0.9)
-nlayers(rgb_filtcor)# 18 looks better
+         # filter
+         rgb_filt <- filter_Stk(lau_rgb,sizes = c(3,5,7,9))
+         nlayers(rgb_filt) # 108 seems to be too much for my laptop for FFS
+         rgb_filtcor <- detct_RstCor(Stk = rgb_filt,THvalue = 0.9)
+         nlayers(rgb_filtcor)# 18 looks better
 
-# combine rgb filter with org rgb bands
-stk_rgb <- raster::stack(rgb_filtcor,lau_rgb)
-writeRaster(stk_rgb,"DATA/FFS_stk/rgb_filt.grd", format="raster") # not equal to pca_rgb_filt but same idea
+         # combine rgb filter with org rgb bands
+         stk_rgb <- raster::stack(rgb_filtcor,lau_rgb)
+         writeRaster(stk_rgb,"DATA/FFS_stk/rgb_filt.grd", format="raster") # not equal to pca_rgb_filt but same idea
 
-### 2. additional Stacks to test
+                  # rgb filter only to compare impact of single band rgb addition
+                  writeRaster(rgb_filtcor,"DATA/FFS_stk/filtercor_only.grd", format="raster")
+                  # all indices to see if HI or RI is selected by FFS
+                  ind_all <-vegInd_RGB(lau_rgb,3,2,1)
+                  writeRaster(ind_all,"DATA/FFS_stk/ind_all.grd", format="raster")
 
-# rgb filter only to compare impact of single band rgb addition
-writeRaster(rgb_filtcor,"DATA/FFS_stk/filtercor_only.grd", format="raster")
-# all indices to see if HI or RI is selected by FFS
-ind_all <-vegInd_RGB(lau_rgb,3,2,1)
-writeRaster(ind_all,"DATA/FFS_stk/ind_all.grd", format="raster")
+                           # at least to test how PCAs are selected combine a PCA with the original Layers it was computed from
 
-# at least to test how PCAs are selected combine a PCA with the original Layers it was computed from
-
-pca_filt = RStoolbox::rasterPCA(stk_rgb,maskCheck = T, spca = T, nComp = 3)
-map_pca <- pca_filt$map
-stk_pca <- stack(map_pca,stk_rgb)
-writeRaster(stk_pca,"DATA/FFS_stk/stk_pca.grd", format="raster")
-
-### all filter on all indices could take a whil for FFS, thus lets leave this out atm
+                           pca_filt = RStoolbox::rasterPCA(stk_rgb,maskCheck = T, spca = T, nComp = 3)
+                           map_pca <- pca_filt$map
+                           stk_pca <- stack(map_pca,stk_rgb)
+                           writeRaster(stk_pca,"DATA/FFS_stk/stk_pca.grd", format="raster")
+# end of script
 
