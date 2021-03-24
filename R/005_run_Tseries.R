@@ -2,7 +2,7 @@
 
 # setup set working directory
 getwd()
-path <-"C:/Envimaster/MSc_Thesis" # set drive letter for stick
+path <-"C:/Envimaster/AOA-Impact" # set drive letter for stick
 setwd(path)
 
 
@@ -18,22 +18,28 @@ require(viridis)
 require(png)
 require(latticeExtra)
 require(gridExtra)
-
+require(IKARUS)
 # load functions
-source("R/FUN_LEGION.R")
-source("R/FUN_IKARUS.R")
-source("R/wrapper_IKARUS_dawn.R")
+source(file.path(path,"R/100_Dawn2.R"))
 
 # load data
 
-# org data
+# RGB data
 lau_rgb <- raster::stack(file.path(path,"Data/lau_RGB.grd") )# the example rgb imaga
 
+# plot
 plotRGB(lau_rgb,3,2,1)
 
+# load Training Points
 lau_tP <-rgdal::readOGR(file.path(path,"DATA/lau_Tpoints.shp"))
 # handle CRS string
 crs(lau_tP) <- crs(lau_rgb)
+
+# load response layer
+lau_rsp <-rgdal::readOGR(system.file("extdata","lau_TreeSeg.shp",package = "IKARUS"))
+# handle CRS string
+crs(lau_rsp) <- crs(lau_rgb)
+
 
 ### MSc Test Series I Impact of training design on RGB only
 # Note: width is in radius meter
@@ -42,9 +48,32 @@ crs(lau_tP) <- crs(lau_rgb)
 path_png <- file.path(path,"Data/results/RGB_sizes//")
 
 # with 0.15 cell size: 0.15 steps makes sense, bigger than 1.2 look too big
-IKARUS_dawn(Tpoints = lau_tP,buf_size = 0.15,design = "ROUND",Stk = lau_rgb,Stk_name = "rgb",plot_res = T,save_png = T,save_res = F,path_png = path_png)
-IKARUS_dawn(Tpoints = lau_tP,buf_size = 0.3 ,design = "ROUND",Stk = lau_rgb,Stk_name = "rgb",plot_res = T,save_png = T,save_res = F,path_png = path_png)
-IKARUS_dawn(Tpoints = lau_tP,buf_size = 0.60,design = "ROUND",Stk = lau_rgb,Stk_name = "rgb",plot_res = T,save_png = T,save_res = F,path_png = path_png)
+t1 <-Dawn2(validate = T,rsp = lau_rsp,rsp_class = "t", Tpoints = lau_tP,buf_size = 0.15,design = "ROUND",Stk = lau_rgb,Stk_name = "rgb",plot_res = F,save_png = F,save_res = F,path_png = path_png)
+t2 <-Dawn2(validate = T,rsp = lau_rsp,rsp_class = "t", Tpoints = lau_tP,buf_size = 0.3 ,design = "ROUND",Stk = lau_rgb,Stk_name = "rgb",plot_res = T,save_png = F,save_res = F,path_png = path_png)
+t3 <-Dawn2(validate = T,rsp = lau_rsp,rsp_class = "t", Tpoints = lau_tP,buf_size = 0.60,design = "ROUND",Stk = lau_rgb,Stk_name = "rgb",plot_res = F,save_png = F,save_res = F,path_png = path_png)
+
+
+# function to merge all df in a list
+mergeDFs <- function(ls){
+  # loop
+  for (i in 1:length(ls)-1){
+
+    # first run set df 
+    if(i==1){
+    df <- merge(ls[i],ls[i+1],all=T)
+    # all other runs add next ls to df
+    } else {
+      df <- merge(df,ls[i+1],all=T)
+    }
+  } 
+  if(nrow(df)!=length(ls)){
+    stop("something wrong")
+  }
+  return(df)
+}
+
+
+
 IKARUS_dawn(Tpoints = lau_tP,buf_size = 1.2 ,design = "ROUND",Stk = lau_rgb,Stk_name = "rgb",plot_res = T,save_png = T,save_res = F,path_png = path_png)
 
 IKARUS_dawn(Tpoints = lau_tP,buf_size = 0.15,design = "SQUARE",Stk = lau_rgb,Stk_name = "rgb",plot_res = T,save_png = T,save_res = F,path_png = path_png)
