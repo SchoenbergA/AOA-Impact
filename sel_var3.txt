@@ -1,0 +1,26 @@
+> # selected variables
+> rgb3115$model_LLOCV$selectedvars
+[1] "VVI"       "PC1_mean5"
+> rgb3215$model_LLOCV$selectedvars
+[1] "PC1_min5" "PC1_max5" "PC1_sd3" 
+> rgb3130$model_LLOCV$selectedvars
+[1] "VVI"       "PC1_mean5"
+> rgb3230$model_LLOCV$selectedvars
+[1] "PC1_min5"   "PC1_max5"   "PC1_modal5" "PC1_mean5"  "PC1_min3"  
+> rgb3145$model_LLOCV$selectedvars
+[1] "PC1_min5"   "PC1_mean5"  "TGI"        "PC1_sobel5"
+> rgb3245$model_LLOCV$selectedvars
+[1] "PC1_min5"   "PC1_max5"   "PC1_sd5"    "PC1_modal3" "PC1_modal5"
+> rgb3160$model_LLOCV$selectedvars
+[1] "PC1_min5"   "PC1_mean5"  "VVI"        "TGI"        "PC1_modal5" "PC1_min3"   "PC1_sobel5"
+> rgb3260$model_LLOCV$selectedvars
+[1] "PC1_min5"     "PC1_mean5"    "TGI"          "PC1_modal5"   "PC1_sobel_h5" "green"       
+> rgb3175$model_LLOCV$selectedvars
+[1] "PC1_min5"     "PC1_mean5"    "VVI"          "PC1_min3"     "TGI"          "PC1_sobel5"   "PC1_sd3"     
+[8] "PC1_sd5"      "PC1_sobel_h5"
+> rgb3275$model_LLOCV$selectedvars
+[1] "PC1_min5"   "PC1_max5"   "TGI"        "PC1_max3"   "PC1_sobel5"
+> rgb3190$model_LLOCV$selectedvars
+[1] "PC1_sd3"   "PC1_mean5" "PC1_max5"  "TGI"      
+> rgb3290$model_LLOCV$selectedvars
+[1] "PC1_min5"   "PC1_sd5"    "TGI"        "PC1_modal3"min3"   "NGRDI"      "blue"       "PC1_max3"   "PC1_modal5"
