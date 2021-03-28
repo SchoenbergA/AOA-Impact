@@ -15,13 +15,10 @@
 #' @details
 #' ## available indices
 #' * "VVI" Visible Vegetation Index (1 - abs((red - 30) / (red + 30))) * (1 - abs((green - 50) / (green + 50))) *(1 - abs((blue - 1) / (blue + 1)))
-#' * "VARI" Visible Atmospherically Resistant Index (green-red)/(green+red-blue)
 #' * "NDTI" Normalized Difference Turbidity Index (red-green)/(red+green)
-#' * "RI" Redness index (red**2/(blue*green**3)
 #' * "CI" Soil Colour Index (red-green)/(red+green)
 #' * "BI" Brightness Index sqrt((red**2+green**2+blue*2)/3)
 #' * "SI" Spectra Slope Saturation Index (red-blue)/(red+blue)
-#' * "HI" Primary Colours Hue Index (2*red-green-blue)/(green-blue)
 #' * "TGI" Triangular Greenness Index (-0.5*(190*(red - green)- 120*(red - blue))
 #' * "GLI" Green Leaf Index (2*green-red-blue)/(2*green+red+blue)
 #' * "NGRDI" Normalized Green Red Difference Index (green-red)/(green+red)
@@ -48,12 +45,12 @@ vegInd_RGB<- function(rgb,red=NULL,green=NULL,blue=NULL,indlist="all"){
 
   ### check input
   if(any(indlist=="all")){
-    indlist <-c("VVI","VARI","NDTI","RI","CI","BI","SI","HI","TGI","GLI","NGRDI")
+    indlist <-c("VVI","NDTI","CI","BI","SI","TGI","GLI","NGRDI")
   }else{indlist=indlist}
 
         #create notin and check for wrong input
         `%notin%` <- Negate(`%in%`)
-        if(any(indlist %notin% c("VVI","VARI","NDTI","RI","CI","BI","SI","HI","TGI","GLI","NGRDI"))) {
+        if(any(indlist %notin% c("VVI","NDTI","CI","BI","SI","TGI","GLI","NGRDI"))) {
           stop("wrong Vegetation Index selected or not supported")
         }
 
@@ -78,12 +75,6 @@ vegInd_RGB<- function(rgb,red=NULL,green=NULL,blue=NULL,indlist="all"){
       names(VVI) <- "VVI"
       return(VVI)
 
-    } else if (item=="VARI"){
-      cat(" ",sep = "\n")
-      cat("### LEGION calculating (Visible Atmospherically Resistant Index (VARI)) ###",sep = "\n")
-      VARI<-(green-red)/(green+red-blue)
-      names(VARI) <- "VARI"
-      return(VARI)
 
     } else if (item=="NDTI"){
       cat(" ",sep = "\n")
@@ -92,12 +83,6 @@ vegInd_RGB<- function(rgb,red=NULL,green=NULL,blue=NULL,indlist="all"){
       names(NDTI) <- "NDTI"
       return(NDTI)
 
-    } else if (item=="RI"){
-      cat(" ",sep = "\n")
-      cat("### LEGION calculating (Redness index (RI)) ###",sep = "\n")
-      RI<-red**2/(blue*green**3)
-      names(RI) <- "RI"
-      return(RI)
 
     } else if (item=="CI"){
       cat(" ",sep = "\n")
@@ -120,12 +105,6 @@ vegInd_RGB<- function(rgb,red=NULL,green=NULL,blue=NULL,indlist="all"){
       names(SI) <- "SI"
       return(SI)
 
-    } else if (item=="HI"){
-      cat(" ",sep = "\n")
-      cat("### LEGION calculating (Primary colours Hue Index (HI)) ###",sep = "\n")
-      HI<-(2*red-green-blue)/(green-blue)
-      names(HI) <- "HI"
-      return(HI)
 
     } else if (item=="TGI"){
       cat(" ",sep = "\n")
